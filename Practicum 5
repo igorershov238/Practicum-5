@@ -1,0 +1,96 @@
+#include <iostream>
+#include <windows.h>
+#include <cmath>
+#include <iomanip>
+
+using namespace std;
+
+int main() {
+    SetConsoleOutputCP(65001);
+    SetConsoleCP(65001);
+
+    double x, eps;
+    int n, choice;
+
+    do {
+        // Цикл перевірки діапазону для x: 0 < x < 1
+        do {
+            cout << "Введіть x (0 < x < 1): ";
+            cin >> x;
+            if (x <= 0 || x >= 1) {
+                cout << "Помилка! Значення x повинно бути в інтервалі (0, 1). Спробуйте ще раз.\n";
+            }
+        } while (x <= 0 || x >= 1);
+
+        // Цикл перевірки діапазону для n: n > 0
+        do {
+            cout << "Введіть кількість членів ряду n (n > 0): ";
+            cin >> n;
+            if (n <= 0) {
+                cout << "Помилка! Кількість членів має бути додатним числом. Спробуйте ще раз.\n";
+            }
+        } while (n <= 0);
+
+        // Цикл перевірки діапазону для eps (такий самий як у x): 0 < eps < 1
+        do {
+            cout << "Введіть точність eps (0 < eps < 1): ";
+            cin >> eps;
+            if (eps <= 0 || eps >= 1) {
+                cout << "Помилка! Значення eps повинно бути в інтервалі (0, 1). Спробуйте ще раз.\n";
+            }
+        } while (eps <= 0 || eps >= 1);
+
+        // Обчислення для фіксованого n
+        double S_n = 0.0;
+        double A = (x * (4.0 - x)) / 2.0; // Перший член ряду (при k = 1)
+        S_n += A;
+
+        for (int k = 1; k < n; ++k) {
+            double R = x * x * (double)k * (2.0 * k - 1.0) / ((k + 1.0) * (2.0 * k + 1.0)) *
+                (4.0 * (k + 1.0) - 2.0 * (k + 1.0) * x + x) / (4.0 * k - 2.0 * k * x + x);
+            A *= R;
+            S_n += A;
+        }
+
+        // Обчислення з точністю eps (без зайвої змінної A_next)
+        double S_eps = 0.0;
+        double A_curr = (x * (4.0 - x)) / 2.0; // Перший член ряду
+        S_eps += A_curr;
+        int k = 1;
+
+        while (true) {
+            double R = x * x * (double)k * (2.0 * k - 1.0) / ((k + 1.0) * (2.0 * k + 1.0)) *
+                (4.0 * (k + 1.0) - 2.0 * (k + 1.0) * x + x) / (4.0 * k - 2.0 * k * x + x);
+            A_curr *= R;
+
+            if (fabs(A_curr) < eps) {
+                break;
+            }
+
+            S_eps += A_curr;
+            k++;
+        }
+
+        // Обчислення контрольного виразу C = ln(sqrt((1+x)^3 / (1-x)))
+        double C = log(sqrt(pow(1.0 + x, 3) / (1.0 - x)));
+
+        // Виведення результатів
+        cout << "\nСума ряду для n = " << n << " членів (S_n): " << S_n << endl;
+        cout << "Сума ряду з точністю eps = " << eps << " (S_eps): " << S_eps << " (використано " << k << " членів)" << endl;
+        cout << "Контрольне значення C: " << C << endl << endl;
+
+        // Цикл перевірки відповіді на повторення
+        do {
+            cout << "Бажаєте спробувати ще раз? (1 - Так, 0 - Ні): ";
+            cin >> choice;
+            if (choice != 1 && choice != 0) {
+                cout << "Помилка! Введіть 1 (Так) або 0 (Ні).\n";
+            }
+        } while (choice != 1 && choice != 0);
+
+        cout << endl;
+
+    } while (choice == 1);
+
+    return 0;
+}
